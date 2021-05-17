@@ -3,7 +3,7 @@ MACHINES = {
   # VM name "new-kernel"
   :"new-kernel" => {
               # VM box
-              :box_name => "centos-7.9.2009",
+              :box_name => "shrew/centos-7-9",
               # VM CPU count
               :cpus => 2,
               # VM RAM size (Mb)
