@@ -9,15 +9,15 @@ Also in I've added **`lsblk`** to SHELL block to see result in console while VM 
   
 ```ruby
       box.vm.provider :virtualbox do |vb|
-            	  vb.customize ["modifyvm", :id, "--memory", "1024"]
+            	vb.customize ["modifyvm", :id, "--memory", "1024"]
                 needsController = false
-		            boxconfig[:disks].each do |dname, dconf|
-			              unless File.exist?(dconf[:dfile])
-				                vb.customize ['createhd', '--filename', dconf[:dfile], '--variant', 'Fixed', '--size', dconf[:size]]
-                        needsController =  true
-                    end
-
-		            end
+                boxconfig[:disks].each do |dname, dconf|
+                     unless File.exist?(dconf[:dfile])
+                         vb.customize ['createhd', '--filename', dconf[:dfile], '--variant', 'Fixed', '--size', dconf[:size]]
+                         needsController =  true
+                     end
+		end
+		
                 if needsController == true
                      vb.customize ["storagectl", :id, "--name", "SATA", "--add", "sata" ]
                      boxconfig[:disks].each do |dname, dconf|
