@@ -17,7 +17,7 @@ Also in I've added **`lsblk`** to SHELL block to see result in console while VM 
                          needsController =  true
                      end
 		end
-		
+  
                 if needsController == true
                      vb.customize ["storagectl", :id, "--name", "SATA", "--add", "sata" ]
                      boxconfig[:disks].each do |dname, dconf|
@@ -36,12 +36,12 @@ Also in I've added **`lsblk`** to SHELL block to see result in console while VM 
                   unless File.exist?('./sata1.vdi')
                        vb.customize ["storagectl", :id, "--name", "SATA", "--add", "sata" ]
                   end
-
-		              boxconfig[:disks].each do |dname, dconf|
-			                    unless File.exist?(dconf[:dfile])
-			                          vb.customize ['createhd', '--filename', dconf[:dfile], '--variant', 'Fixed', '--size', dconf[:size]]
-                                vb.customize ['storageattach', :id,  '--storagectl', 'SATA', '--port', dconf[:port], '--device', 0, '--type', 'hdd', '--medium', dconf[:dfile]]
-                          end
-		              end
+  
+                  boxconfig[:disks].each do |dname, dconf|
+                       unless File.exist?(dconf[:dfile])
+                            vb.customize ['createhd', '--filename', dconf[:dfile], '--variant', 'Fixed', '--size', dconf[:size]]
+                            vb.customize ['storageattach', :id,  '--storagectl', 'SATA', '--port', dconf[:port], '--device', 0, '--type', 'hdd', '--medium', dconf[:dfile]]
+                       end
+                  end
       end
 ```
