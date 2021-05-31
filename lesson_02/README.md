@@ -3,7 +3,7 @@
 > Basic vagrantfile from repository was modified to resolve problems with attaching new disks to VM.  
 > Original version works fine only once, after adding new disk in config and restarting VM virtualbox was trying to create controller and fails with error.  
 > I've added simple check is disk with name sata1.vdi exists in folder with Vagrantfile. After that you can add new disk config block in variable section and run **`vagrant reload --provision`** and new disk will appear in system.  
-> Also in I've add **`lsblk`** to SHELL block to see result in console while VM is starting.
+> Also in I've added **`lsblk`** to SHELL block to see result in console while VM is starting.
   
 #### Old disk create/attach block:
   
