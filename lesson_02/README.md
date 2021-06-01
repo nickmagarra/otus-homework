@@ -1,5 +1,13 @@
 # Lesson 2: MDADM
 
+## Content discription
+
+  - **Vagrantfile_no_mdadm** - Vagrantfile that creates new disks and attachs them to VM, installing mdadm and some other tools. 
+  - **Vagrantfile_mdadm** - Vagrantfile that makes everything above and then creates raids, partitions, filesystems on it and adds mountpoints to fstab.
+  - **mdadm_config.sh** - Bash script for manual executing on VM created with ***Vagrantfile_no_mdadm*** that makes all tasts listed in ***mdadm_config.sh***
+
+## Basic Vagrantfile tuning
+
 Basic vagrantfile from repository was modified to resolve problems with attaching new disks to VM.  
 Original version works fine only once, after adding new disk in config and restarting VM virtualbox was trying to create controller and fails with error.  
 I've added simple check is disk with name ***sata1.vdi*** exists in folder with Vagrantfile. After that you can add new disk config block in variable section and run **`vagrant reload --provision`** and new disk will appear in system.  
