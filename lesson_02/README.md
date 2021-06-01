@@ -1,6 +1,6 @@
 # Lesson 2: MDADM
 
-## Content discription
+## Content description
 
   - **Vagrantfile_no_mdadm** - Vagrantfile that creates new disks and attachs them to VM, installing mdadm and some other tools. 
   - **Vagrantfile_mdadm** - Vagrantfile that makes everything above and then creates raids, partitions, filesystems on it and adds mountpoints to fstab.
