@@ -18,4 +18,4 @@ In PDF with hometask I've found some mistakes and fix them:
   3. Not mistake but can by optimized: instead of removing basic root lv and then recreate it with smaller size I'd preffer to use **lvreduce** command end then just format new volume.
 
 ## Note
-Command ```bash grub2-mkconfig -o /boot/grub2/grub.cfg``` doesn't work on CentOS 8 - returns ***device-mapper: reload ioctl on cache1 failed: Device or resource busy***, it can be interesting quest to defeat it.
+Command ```bash grub2-mkconfig -o /boot/grub2/grub.cfg``` doesn't work on CentOS 8 - returns ***device-mapper: reload ioctl on <vol_name> failed: Device or resource busy***, it can be interesting quest to defeat it.
