@@ -1,0 +1,31 @@
+# Part 1: Migrate root fs to temporary lv
+sudo -i
+mount /dev/mapper/vg_root-lv_root /mnt
+xfsdump -J - /dev/mapper/centos_centos7-root | xfsrestore -J - /mnt
+for i in /proc/ /sys/ /dev/ /run/ /boot/; do mount --bind $i /mnt$i; done
+chroot /mnt/
+grub2-mkconfig -o /boot/grub2/grub.cfg
+cd /boot ; for i in `ls initramfs-*img`; do dracut -v $i `echo $i|sed "s/initramfs-//g;s/.img//g"` --force; done
+sed -i 's/rd.lvm.lv=centos_centos7\/root/rd.lvm.lv=vg_root\/lv_root/g' /boot/grub2/grub.cfg
+exit
+reboot
+
+# Part 2: Reduce root-lv size and migrate data back
+sudo -i
+lvreduce -f -y -L 8G /dev/mapper/centos_centos7-root
+mkfs.xfs -f /dev/mapper/centos_centos7-root
+mount /dev/mapper/centos_centos7-root /mnt
+xfsdump -J - /dev/mapper/vg_root-lv_root | xfsrestore -J - /mnt
+for i in /proc/ /sys/ /dev/ /run/ /boot/; do mount --bind $i /mnt$i; done
+chroot /mnt/
+grub2-mkconfig -o /boot/grub2/grub.cfg
+cd /boot ; for i in `ls initramfs-*img`; do dracut -v $i `echo $i|sed "s/initramfs-//g;s/.img//g"` --force; done
+exit
+reboot
+
+# Part 3: Cleanup and check result
+sudo -i
+lvremove -y vg_root/lv_root
+vgremove -y vg_root
+pvremove /dev/sdb
+df -hT

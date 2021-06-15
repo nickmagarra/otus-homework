@@ -1,0 +1,110 @@
+# -*- mode: ruby -*-
+# vim: set ft=ruby :
+
+MACHINES = {
+  :"lesson03-lvm" => {
+        :box_name => "generic/centos7",
+	:disks => {
+		:sata1 => {
+			:dfile => './sata1.vdi',
+			:size => 10240,
+			:port => 1
+		},
+		:sata2 => {
+                        :dfile => './sata2.vdi',
+                        :size => 2048, # Megabytes
+			:port => 2
+		},
+                :sata3 => {
+                        :dfile => './sata3.vdi',
+                        :size => 1024,
+                        :port => 3
+                },
+                :sata4 => {
+                        :dfile => './sata4.vdi',
+                        :size => 1024, # Megabytes
+                        :port => 4
+                }
+
+	}
+  }
+}
+
+Vagrant.configure("2") do |config|
+
+  MACHINES.each do |boxname, boxconfig|
+
+      config.vm.define boxname do |box|
+
+          box.vm.box = boxconfig[:box_name]
+          box.vm.host_name = boxname.to_s
+
+          box.vm.provider :virtualbox do |vb|
+                  vb.customize ["modifyvm", :id, "--memory", "1024"]
+                               
+                  unless File.exist?("./sata1.vdi")
+                       vb.customize ["storagectl", :id, "--name", "SATA", "--add", "sata" ]
+                  end
+
+		  boxconfig[:disks].each do |dname, dconf|
+			  unless File.exist?(dconf[:dfile])
+				vb.customize ['createhd', '--filename', dconf[:dfile], '--variant', 'Standard', '--size', dconf[:size]]
+                                vb.customize ['storageattach', :id,  '--storagectl', 'SATA', '--port', dconf[:port], '--device', 0, '--type', 'hdd', '--medium', dconf[:dfile]]
+                          end
+		  end
+          end
+
+          box.vm.provision "shell", inline: <<-SHELL
+              if [[ ! -a ~root/.ssh/authorized_keys ]]
+              then
+	      mkdir -p ~root/.ssh
+              cp ~vagrant/.ssh/auth* ~root/.ssh
+	      yum -y install smartmontools hdparm gdisk nano xfsdump
+              echo "===== Staring first part of homework ====="
+              pvcreate /dev/sdb
+              pvcreate /dev/sdc
+              pvcreate /dev/sdd /dev/sde
+              vgcreate vg_root /dev/sdb
+              vgcreate vg_home /dev/sdc
+              vgcreate vg_var /dev/sdd /dev/sde
+              lvcreate -y -q -n lv_root -l +100%FREE vg_root
+              lvcreate -y -q -n lv_home -l +90%FREE vg_home
+              lvcreate -y -q -n lv_var -m1 -L 950M vg_var
+              mkfs.xfs -f /dev/mapper/vg_root-lv_root
+              mkfs.xfs -f /dev/mapper/vg_home-lv_home
+              mkfs.ext4 -F /dev/mapper/vg_var-lv_var
+              mount /dev/mapper/vg_var-lv_var /mnt
+              cp -aR /var/* /mnt/
+              umount /mnt
+              mount /dev/mapper/vg_var-lv_var /var
+              echo "`blkid | grep var: | awk '{print $2}'` /var ext4 defaults 0 0" >> /etc/fstab
+              mount /dev/mapper/vg_home-lv_home /mnt
+              cp -aR /home/* /mnt/
+              rm -rf /home/*
+              umount /mnt
+              mount /dev/mapper/vg_home-lv_home /home
+              echo "`blkid | grep home: | awk '{print $2}'` /home xfs defaults 0 0" >> /etc/fstab
+              touch /home/file{1..20}
+              lvcreate -n home_snap -L 100MB -s vg_home/lv_home
+              rm -f /home/file{1..10}
+              echo ""
+              echo "Some files deleted, now in /home"
+              echo "--------------------------------"
+              ls -Chal /home
+              umount /home
+              echo ""
+              echo "Restore test snapshot of /home"
+              echo "------------------------------"
+              lvconvert --merge /dev/mapper/vg_home-home_snap
+              mount /home
+              echo "Snapshot restored, now in /home"
+              echo "-------------------------------"
+              ls -Chal /home
+              echo "===== First part of homework is donet ====="
+              fi
+          SHELL
+
+      end
+  end
+end
+
